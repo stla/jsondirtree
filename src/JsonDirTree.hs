@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell   #-}
 module JsonDirTree
   where
 import           Data.Aeson                    (FromJSON, ToJSON, encode,
@@ -16,8 +16,7 @@ import           Data.Text                     (Text)
 import qualified Data.Text                     as T
 import           GHC.Generics
 import           System.Directory
-import           System.FilePath               (takeBaseName)
-import Data.Maybe (fromMaybe)
+import           System.FilePath               (splitPath, takeFileName)
 
 data DirTree = DirTree {
                 name     :: FilePath,
@@ -45,7 +44,7 @@ dirtreeExample = DirTree {
   size = Nothing,
   children = Just [
   DirTree {
-    name = "y1",
+    name = "y1.zzz",
     _type = "folder",
     size = Nothing,
     children = Just [
@@ -83,14 +82,14 @@ dirToDirTree depth dir = do
               dirtree <- mapM (dirToDirTree newdepth)
                            $ map (\x -> dir ++ '/':x) contents
               return DirTree {
-                name = takeBaseName dir,
+                name = last $ splitPath dir,
                 _type = dirtype,
                 size = Nothing,
                 children = if depth == Just 0 then Nothing else (Just dirtree)
               }
           else
             return DirTree {
-              name = takeBaseName dir,
+              name = last $ splitPath dir,
               _type = dirtype,
               size = Nothing,
               children = Nothing
@@ -100,7 +99,7 @@ dirToDirTree depth dir = do
         let dirtype = if isSymbolic then "symbolic link" else "file"
         size <- getFileSize dir -- what happens if symbolic ?
         return DirTree {
-          name = takeBaseName dir,
+          name = takeFileName dir,
           _type = dirtype,
           size = Just size,
           children = Nothing

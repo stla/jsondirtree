@@ -24,3 +24,7 @@ library
                      , data-msgpack
                      , filepath
                      , text
+
+source-repository head
+  type:     git
+  location: https://github.com/stla/jsondirtree
