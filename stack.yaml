@@ -1,3 +1,4 @@
-extra-deps: []
+extra-deps:
+- pretty-tree-0.1.0.0
 
 resolver: lts-8.2

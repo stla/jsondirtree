@@ -21,9 +21,11 @@ library
                      , aeson
                      , bytestring
                      , directory
-                     , data-msgpack
+--                     , data-msgpack
                      , filepath
                      , text
+                     , containers
+                     , pretty-tree
 
 source-repository head
   type:     git

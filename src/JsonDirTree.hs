@@ -10,13 +10,16 @@ import           Data.Aeson.Types              (defaultOptions,
                                                 genericToJSON,
                                                 omitNothingFields)
 import           Data.ByteString.Lazy.Internal (ByteString)
-import qualified Data.MessagePack              as MP
+-- import qualified Data.MessagePack              as MP
 -- import Data.MessagePack.Derive
 import           Data.Text                     (Text)
 import qualified Data.Text                     as T
 import           GHC.Generics
 import           System.Directory
 import           System.FilePath               (splitPath, takeFileName)
+import Data.Tree (Tree, unfoldTree, drawTree)
+import Data.Maybe (fromMaybe)
+import Data.Tree.Pretty (drawVerticalTree)
 
 data DirTree = DirTree {
                 name     :: FilePath,
@@ -110,8 +113,28 @@ dirToJSONtree depth dir = do
   dirtree <- dirToDirTree depth dir
   return $ encode dirtree
 
--- string ou bytestring ça ne pack rien du tout...
-dirToMPtree :: Maybe Int -> FilePath -> IO ByteString
-dirToMPtree depth dir = do
-  jsontree <- dirToJSONtree depth dir
-  return $ MP.pack jsontree
+-- -- string ou bytestring ça ne pack rien du tout...
+-- dirToMPtree :: Maybe Int -> FilePath -> IO ByteString
+-- dirToMPtree depth dir = do
+--   jsontree <- dirToJSONtree depth dir
+--   return $ MP.pack jsontree
+
+-- ** non-JSON tree ** --
+dirTreeToTree :: DirTree -> Tree String
+dirTreeToTree dirtree = unfoldTree f dirtree
+  where f dt = (name dt, fromMaybe [] (children dt))
+
+drawDirTree :: DirTree -> String
+drawDirTree = drawTree . dirTreeToTree
+
+drawVerticalDirTree :: DirTree -> String
+drawVerticalDirTree = drawVerticalTree . dirTreeToTree
+
+drawDir :: Maybe Int -> FilePath -> Bool -> IO String
+drawDir depth dir vertical = do
+  dirtree <- dirToDirTree depth dir
+  if vertical
+    then
+      return $ drawVerticalDirTree dirtree
+    else
+      return $ drawDirTree dirtree
