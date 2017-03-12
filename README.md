@@ -1,2 +1,3 @@
 # jsondirtree
-Hierarchical JSON representation of a directory
+
+Hierarchical JSON representation and tree view of a directory.
