@@ -71,12 +71,12 @@ dirtreeExample = DirTree {
 -- getPermissions ? Optional ? errors to handle...
 dirToDirTree :: Maybe Int -> FilePath -> IO DirTree
 dirToDirTree depth dir = do
-  isdir <- doesDirectoryExist dir
+  isDir <- doesDirectoryExist dir
   isSymbolic <- pathIsSymbolicLink dir
-  if isdir
+  let isReallyDir = isDir && (not isSymbolic)
+  if isReallyDir
     then
       do
-        let dirtype = if isSymbolic then "symbolic link" else "folder"
         contents <- listDirectory dir
         if contents /= []
           then
@@ -86,27 +86,34 @@ dirToDirTree depth dir = do
                            $ map (\x -> dir ++ '/':x) contents
               return DirTree {
                 name = last $ splitPath dir,
-                _type = dirtype,
+                _type = "folder",
                 size = Nothing,
                 children = if depth == Just 0 then Nothing else (Just dirtree)
               }
           else
             return DirTree {
               name = last $ splitPath dir,
-              _type = dirtype,
+              _type = "folder",
               size = Nothing,
               children = Nothing
             }
-    else
-      do
-        let dirtype = if isSymbolic then "symbolic link" else "file"
-        size <- getFileSize dir -- what happens if symbolic ?
+    else if isSymbolic
+      then
         return DirTree {
           name = takeFileName dir,
-          _type = dirtype,
-          size = Just size,
+          _type = "link",
+          size = Nothing,
           children = Nothing
         }
+      else
+        do
+          size <- getFileSize dir -- what happens if symbolic ?
+          return DirTree {
+            name = takeFileName dir,
+            _type = "file",
+            size = Just size,
+            children = Nothing
+          }
 
 dirToJSONtree :: Maybe Int -> FilePath -> IO ByteString
 dirToJSONtree depth dir = do
