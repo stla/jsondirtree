@@ -1,2 +1,9 @@
 .stack-work
 .haskell-ghc-mod.json
+*.so
+*.out
+*.dll
+*.a
+*.o
+*.hi
+*.h

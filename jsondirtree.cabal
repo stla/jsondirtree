@@ -1,14 +1,11 @@
 name:                jsondirtree
 version:             0.1.0.0
--- synopsis:
--- description:
+description:         JSON and tree representations of a folder
 homepage:            https://github.com/stla/jsondirtree#readme
-license:             BSD3
-license-file:        LICENSE
+license:             GPL-3
 author:              Stéphane Laurent
 maintainer:          laurent_step@yahoo.fr
 copyright:           2017 Stéphane Laurent
-category:            Web
 build-type:          Simple
 cabal-version:       >=1.24
 extra-source-files:  README.md
@@ -21,7 +18,6 @@ library
                      , aeson
                      , bytestring
                      , directory
---                     , data-msgpack
                      , filepath
                      , text
                      , containers

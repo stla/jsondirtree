@@ -10,16 +10,14 @@ import           Data.Aeson.Types              (defaultOptions,
                                                 genericToJSON,
                                                 omitNothingFields)
 import           Data.ByteString.Lazy.Internal (ByteString)
--- import qualified Data.MessagePack              as MP
--- import Data.MessagePack.Derive
+import           Data.Maybe                    (fromMaybe)
 import           Data.Text                     (Text)
 import qualified Data.Text                     as T
+import           Data.Tree                     (Tree, drawTree, unfoldTree)
+import           Data.Tree.Pretty              (drawVerticalTree)
 import           GHC.Generics
 import           System.Directory
 import           System.FilePath               (splitPath, takeFileName)
-import Data.Tree (Tree, unfoldTree, drawTree)
-import Data.Maybe (fromMaybe)
-import Data.Tree.Pretty (drawVerticalTree)
 
 data DirTree = DirTree {
                 name     :: FilePath,
@@ -29,16 +27,10 @@ data DirTree = DirTree {
               }
               deriving (Show, Generic)
 
--- toEncoding useless; more efficient ?
+-- toEncoding useless; or more efficient ?
 instance ToJSON DirTree where
   toEncoding = genericToEncoding defaultOptions {omitNothingFields = True}
   toJSON = genericToJSON defaultOptions {omitNothingFields = True}
-
--- -- for MessagePack
--- $(deriveObject True ''DirTree)
--- $(derivePack True ''DirTree)
--- -- $(deriveUnpack True ''Document)
-
 
 dirtreeExample :: DirTree
 dirtreeExample = DirTree {
@@ -81,7 +73,8 @@ dirToDirTree depth dir = do
         if contents /= []
           then
             do
-              let newdepth = maybe Nothing (\x -> if x>0 then Just (x-1) else Nothing) depth
+              let newdepth = maybe Nothing
+                               (\x -> if x>0 then Just (x-1) else Nothing) depth
               dirtree <- mapM (dirToDirTree newdepth)
                            $ map (\x -> dir ++ '/':x) contents
               return DirTree {
@@ -120,13 +113,7 @@ dirToJSONtree depth dir = do
   dirtree <- dirToDirTree depth dir
   return $ encode dirtree
 
--- -- string ou bytestring ça ne pack rien du tout...
--- dirToMPtree :: Maybe Int -> FilePath -> IO ByteString
--- dirToMPtree depth dir = do
---   jsontree <- dirToJSONtree depth dir
---   return $ MP.pack jsontree
-
--- ** non-JSON tree ** --
+-- ** ASCII tree ** --
 dirTreeToTree :: DirTree -> Tree String
 dirTreeToTree dirtree = unfoldTree f dirtree
   where f dt = (name dt, fromMaybe [] (children dt))
